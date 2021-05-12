@@ -27,8 +27,20 @@
 #++
 
 Settings::Definition.define do
+  add :consent_decline_mail,
+      format: :string,
+      value: nil
+
   add :email_delivery_method,
       format: :symbol,
+      value: nil
+
+  add :installation_uuid,
+      format: :string,
+      value: nil
+
+  add :mail_handler_api_key,
+      format: :string,
       value: nil
 
   add :sendmail_arguments,
@@ -78,13 +90,161 @@ Settings::Definition.define do
       format: :string,
       value: 'plain'
 
+  add :work_package_list_default_highlighting_mode,
+      format: :string,
+      value: -> { EnterpriseToken.allows_to?(:conditional_highlighting) ? 'inline' : 'none' },
+      allowed: -> { Query::QUERY_HIGHLIGHTING_MODES },
+      writable: -> { EnterpriseToken.allows_to?(:conditional_highlighting) }
+
+  add :welcome_text,
+      format: :string,
+      value: nil
+
+  add :welcome_title,
+      format: :string,
+      value: nil
+
   # Former configurations
+  add :after_first_login_redirect_url,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :after_login_default_redirect_url,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :attachments_storage_path,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :auth_source_sso,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :cache_expires_in_seconds,
+      format: :integer,
+      value: nil,
+      api: false,
+      writable: false
+
+  # use dalli defaults for memcache
+  add :cache_memcache_server,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :cache_namespace,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :database_cipher_key,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
 
   add :edition,
       format: :string,
       value: 'standard',
       api: false,
+      writable: false,
+      allowed: %w[standard bim]
+
+  # Additional / overridden help links
+  add :force_help_link,
+      format: :string,
+      value: nil,
+      api: false,
       writable: false
+
+  add :force_formatting_help_link,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  # Health check configuration
+  add :health_checks_authentication_password,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  # Maximum number of backed up jobs (that are not yet executed)
+  # before health check fails
+  add :health_checks_jobs_queue_count_threshold,
+      format: :integer,
+      value: 50,
+      api: false,
+      writable: false
+  ## Maximum number of minutes that jobs have not yet run after their designated 'run_at' time
+  add :health_checks_jobs_never_ran_minutes_ago,
+      format: :integer,
+      value: 5,
+      api: false,
+      writable: false
+  ## Maximum number of unprocessed requests in puma's backlog.
+  add :health_checks_backlog_threshold,
+      format: :integer,
+      value: 20,
+      api: false,
+      writable: false
+
+  # Impressum link to be set, nil by default (= hidden)
+  add :impressum_link,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  # Allow override of LDAP options
+  add :ldap_force_no_page,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :ldap_auth_source_tls_options,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :omniauth_direct_login_provider,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :override_bcrypt_cost_factor,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :rails_asset_host,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :rails_cache_store,
+      format: :symbol,
+      value: :file_store,
+      api: false,
+      writable: false,
+      allowed: %i[file_store memcache]
 
   add :scm,
       format: :hash,
@@ -92,10 +252,52 @@ Settings::Definition.define do
       api: false,
       writable: false
 
+  add :scm_git_command,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :scm_subversion_command,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :smtp_enable_starttls_auto,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  # Log errors to sentry instance
+  add :sentry_dsn,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  # Allow separate error reporting for frontend errors
+  add :sentry_frontend_dsn,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :sentry_host,
+      format: :string,
+      value: nil,
+      api: false,
+      writable: false
+
+  add :sentry_traces_sample_rate,
+      format: :float,
+      value: 0.1,
+      api: false,
+      writable: false
   # Configuration default values
   {
     'attachments_storage' => 'file',
-    'attachments_storage_path' => nil,
     'attachments_grace_period' => 180,
 
     # Configure fog, e.g. when using an S3 uploader
@@ -110,7 +312,6 @@ Settings::Definition.define do
     'backup_initial_waiting_period' => 24.hours,
     'backup_include_attachments' => true,
     'backup_attachment_size_max_sum_mb' => 1024,
-    'database_cipher_key' => nil,
     # only applicable in conjunction with fog (effectively S3) attachments
     # which will be uploaded directly to the cloud storage rather than via OpenProject's
     # server process.
@@ -118,16 +319,8 @@ Settings::Definition.define do
     'fog_download_url_expires_in' => 21600, # 6h by default as 6 hours is max in S3 when using IAM roles
     'show_community_links' => true,
     'log_level' => 'info',
-    'scm_git_command' => nil,
-    'scm_subversion_command' => nil,
     'scm_local_checkout_path' => 'repositories', # relative to OpenProject directory
     'disable_browser_cache' => true,
-    # default cache_store is :file_store in production and :memory_store in development
-    'rails_cache_store' => nil,
-    'cache_expires_in_seconds' => nil,
-    'cache_namespace' => nil,
-    # use dalli defaults for memcache
-    'cache_memcache_server' => nil,
     # where to store session data
     'session_store' => :active_record_store,
     'session_cookie_name' => '_open_project_session',
@@ -138,31 +331,19 @@ Settings::Definition.define do
     # url-path prefix
     'rails_relative_url_root' => '',
     'rails_force_ssl' => false,
-    'rails_asset_host' => nil,
     # Enable internal asset server
     'enable_internal_assets_server' => false,
-
-    # Additional / overridden help links
-    'force_help_link' => nil,
-    'force_formatting_help_link' => nil,
-
-    # Impressum link to be set, nil by default (= hidden)
-    'impressum_link' => nil,
 
     # user configuration
     'default_comment_sort_order' => 'asc',
 
     # email configuration
     'email_delivery_configuration' => 'inapp',
-    'smtp_enable_starttls_auto' => nil,
 
     'disable_password_login' => false,
-    'auth_source_sso' => nil,
-    'omniauth_direct_login_provider' => nil,
     'internal_password_confirmation' => true,
 
     'disable_password_choice' => false,
-    'override_bcrypt_cost_factor' => nil,
 
     'disabled_modules' => [], # allow to disable default modules
     'hidden_menu_items' => {},
@@ -177,18 +358,6 @@ Settings::Definition.define do
 
     'ee_manager_visible' => true,
 
-    # Health check configuration
-    'health_checks_authentication_password' => nil,
-    # Maximum number of backed up jobs (that are not yet executed)
-    # before health check fails
-    'health_checks_jobs_queue_count_threshold' => 50,
-    # Maximum number of minutes that jobs have not yet run after their designated 'run_at' time
-    'health_checks_jobs_never_ran_minutes_ago' => 5,
-    # Maximum number of unprocessed requests in puma's backlog.
-    'health_checks_backlog_threshold' => 20,
-
-    'after_login_default_redirect_url' => nil,
-    'after_first_login_redirect_url' => nil,
 
     'main_content_language' => 'english',
 
@@ -225,20 +394,8 @@ Settings::Definition.define do
     # Render storage information
     'show_storage_information' => true,
 
-    # Log errors to sentry instance
-    'sentry_dsn' => nil,
-    # Allow separate error reporting for frontend errors
-    'sentry_frontend_dsn' => nil,
-    'sentry_host' => nil,
-    # Sample rate for performance monitoring
-    'sentry_traces_sample_rate' => 0.1,
-
     # Allow connection to Augur
     'enterprise_trial_creation_host' => 'https://augur.openproject.com',
-
-    # Allow override of LDAP options
-    'ldap_auth_source_tls_options' => nil,
-    'ldap_force_no_page' => false,
 
     # Allow users to manually sync groups in a different way
     # than the provided job using their own cron
@@ -254,7 +411,6 @@ Settings::Definition.define do
     add name,
         format: config['format'] == 'int' ? :integer : config['format'],
         value: config['default'],
-        serialized: config.fetch('serialized', false),
         api: false
   end
 end

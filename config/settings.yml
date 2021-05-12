@@ -55,12 +55,6 @@ consent_info:
 consent_required:
   default: 0
   format: boolean
-consent_decline_mail:
-  default:
-welcome_title:
-  default:
-welcome_text:
-  default:
 welcome_on_homescreen:
   default: 0
   format: boolean
@@ -224,8 +218,6 @@ mail_handler_ignore_filenames:
   default: 'signature.asc'
 mail_handler_body_delimiter_regex:
   default: ''
-mail_handler_api_key:
-  default:
 mail_suffix_separators:
   default: '+'
 work_package_list_default_columns:
@@ -342,8 +334,6 @@ boards_demo_data_available:
   default: false
 security_badge_displayed:
   default: true
-installation_uuid:
-  default: null
 oauth_allow_remapping_of_existing_users:
   default: false
   format: boolean
