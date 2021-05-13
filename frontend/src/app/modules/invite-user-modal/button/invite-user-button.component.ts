@@ -5,7 +5,7 @@ import { IFieldSchema } from "core-app/modules/fields/field.base";
 import { SelectEditFieldComponent } from "core-app/modules/fields/edit/field-types/select-edit-field/select-edit-field.component";
 import { MultiSelectEditFieldComponent } from "core-app/modules/fields/edit/field-types/multi-select-edit-field.component";
 import { I18nService } from "core-app/modules/common/i18n/i18n.service";
-import { PermissionsService } from "core-app/core/services/permissions/permissions.service";
+import { PermissionsService } from "core-app/core/permissions/permissions.service";
 import { OpInviteUserModalService } from "core-app/modules/invite-user-modal/invite-user-modal.service";
 
 @Component({

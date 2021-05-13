@@ -32,7 +32,7 @@ import {
   FormattableEditFieldComponent,
   formattableFieldTemplate
 } from "core-app/modules/fields/edit/field-types/formattable-edit-field/formattable-edit-field.component";
-import { InjectField } from "core-app/helpers/angular/inject-field.decorator";
+import { InjectField } from "core-app/shared/helpers/angular/inject-field.decorator";
 
 @Component({
   template: formattableFieldTemplate
